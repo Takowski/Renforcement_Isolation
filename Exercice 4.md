@@ -1,0 +1,8 @@
+# Mitigation et durcissement (synthèse)
+
+| Contrôle | Bloqué | Limite / périmètre | Contournement | Correctif |
+| :--- | :--- | :--- | :--- | :--- |
+| 6.1 CLI / PHP (nologin, sans sudo, retrait CLI ou AppArmor) | Exécution hors unité (PHP CLI) qui échappe à php-fpm et au sandbox systemd | Sandbox lié à l'unité, pas au binaire ; AppArmor livré = périmètre étroit (ClamAV), lourd sur interpréteur | Lancer le script en CLI hors unité ou via accès opérateur / sudo | nologin, pas de sudo pour l'identité web, retrait CLI et confinement service |
+| 6.2 Intégrité (dpkg --verify vs FIM / AIDE) | Écarts aux paquets (dpkg) et ajouts/modifs hors paquets comme shell.php (AIDE) | dpkg ne voit que les paquets (ignore shell.php) ; AIDE exige une baseline saine et gestion de dérive | Déposer un fichier/webshell hors paquet ou modifier sans re-baseliner | Déployer AIDE avec baseline hors-ligne, re-baseliner et garder le webroot RO |
+| 6.3 Compilateur / toolchain (gcc, make, lynis) | Compilation locale de programmes ou rootkits LKM (diamorphine) sur la cible | Bloque le build local, pas un binaire/module précompilé ; lynis vérifie l'état, pas l'efficacité | Importer ou charger un binaire / .ko précompilé, ou exploiter l'existant | Retirer la toolchain en prod, restreindre les modules (modules_disabled / signatures) |
+| 6.4 Limites / défense en profondeur | Payloads shell, réseau AF_INET, fichiers hors open_basedir et écriture DB | Restent possibles : payload dans le périmètre autorisé, 0-day et erreur d'opérateur | Faille 0-day, erreur humaine/config ou action interne aux droits autorisés | Patching régulier, automatisation, audit de baseline et empilement des contrôles |
